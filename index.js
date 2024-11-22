@@ -106,8 +106,12 @@ app.get('/mision', (req, res) => {
   const user = req.query.user;
   const costo = parseInt(req.query.cost);
 
-  if (!user || !costo || !usersData[user]) {
-    return res.send('Usuario no encontrado o información inválida.');
+  if (!user || !costo) {
+    return res.send('Por favor, usa el comando correctamente. Ejemplo: !mision 100');
+  }
+
+  if (!usersData[user]) {
+    return res.send('Usuario no encontrado. Usa !registrar para comenzar.');
   }
 
   if (usersData[user].monedas < costo) {
@@ -133,3 +137,4 @@ loadUsers();
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
+
