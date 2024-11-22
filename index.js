@@ -1,76 +1,135 @@
 const express = require('express');
 const fs = require('fs');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-// Carga de datos inicial de usuarios
-let users = [];
-try {
+let usersData = {};  // Almacena los datos de los usuarios
+
+// Cargar usuarios desde el archivo JSON al iniciar
+const loadUsers = () => {
+  try {
     const data = fs.readFileSync('users.json', 'utf8');
-    users = JSON.parse(data);
-} catch (error) {
-    console.error('No se pudo cargar el archivo users.json:', error);
-}
-
-// Guardar usuarios en el archivo JSON
-function saveUsers() {
-    fs.writeFileSync('users.json', JSON.stringify(users, null, 2));
-}
-
-// Configuración de misiones
-const missionTiers = {
-    100: { reward: 150, penalty: 100, successRate: 0.8 },
-    300: { reward: 500, penalty: 300, successRate: 0.6 },
-    500: { reward: 900, penalty: 500, successRate: 0.4 },
-    2000: { reward: 4000, penalty: 2000, successRate: 0.5 }, // Épica
+    usersData = JSON.parse(data);
+  } catch (err) {
+    console.log('Error al leer el archivo users.json:', err);
+  }
 };
 
-// Ruta para ejecutar una misión
-app.get('/mision', (req, res) => {
-    const userName = req.query.user || 'Anónimo';
-    const missionCost = parseInt(req.query.cost, 10);
+// Guardar datos de usuarios al archivo JSON
+const saveUsers = () => {
+  fs.writeFileSync('users.json', JSON.stringify(usersData, null, 2));
+};
 
-    if (!missionTiers[missionCost]) {
-        return res.send('Por favor selecciona un monto válido para la misión: 100, 300, 500 o 2000.');
-    }
+// Ruta para ver el saldo de monedas de un usuario
+app.get('/monedas', (req, res) => {
+  const user = req.query.user;
 
-    const mission = missionTiers[missionCost];
-
-    // Busca al usuario
-    let user = users.find((u) => u.name === userName);
-
-    // Si el usuario no existe, se crea con el saldo inicial
-    if (!user) {
-        user = { name: userName, coins: 200, loan: 0 };
-        users.push(user);
-    }
-
-    // Verifica si el usuario tiene saldo suficiente o necesita un préstamo
-    if (user.coins < missionCost) {
-        const loanNeeded = missionCost - user.coins;
-        user.loan += loanNeeded;
-        user.coins = 0;
-        res.send(`No tienes suficientes monedas. Se te ha otorgado un préstamo de ${loanNeeded} monedas.`);
-    } else {
-        user.coins -= missionCost; // Deduce el costo de la misión
-    }
-
-    // Determina el resultado de la misión
-    const randomOutcome = Math.random();
-    if (randomOutcome < mission.successRate) {
-        user.coins += mission.reward;
-        res.send(`¡${userName}, completaste la misión y ganaste ${mission.reward} monedas! Ahora tienes ${user.coins} monedas.`);
-    } else {
-        user.coins -= mission.penalty;
-        res.send(`¡${userName}, fallaste la misión! Perdiste ${mission.penalty} monedas. Ahora tienes ${user.coins} monedas.`);
-    }
-
-    // Guardar usuarios y evitar duplicados
-    users = users.filter((u, index, self) => self.findIndex(user => user.name === u.name) === index);
-    saveUsers();
+  if (usersData[user]) {
+    res.send(`${user}, tienes ${usersData[user].monedas} monedas.`);
+  } else {
+    res.send(`Usuario no encontrado. Usa !mision para comenzar.`);
+  }
 });
 
-// Servidor en ejecución
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
+// Ruta para solicitar un préstamo
+app.get('/prestamo', (req, res) => {
+  const user = req.query.user;
+
+  if (usersData[user] && usersData[user].monedas <= 99) {
+    // Otorgar un préstamo de 100 monedas
+    usersData[user].monedas += 100;
+    saveUsers();
+    res.send(`${user}, se te ha otorgado un préstamo de 100 monedas. Ahora tienes ${usersData[user].monedas} monedas.`);
+  } else if (usersData[user]) {
+    res.send(`${user}, no necesitas un préstamo. Tienes más de 100 monedas.`);
+  } else {
+    res.send(`Usuario no encontrado. Usa !mision para comenzar.`);
+  }
+});
+
+// Función para generar una misión aleatoria
+const generarMision = (dificultad) => {
+  const enemigosFaciles = [
+    'Luchaste contra Hoja Inerte', 'Luchaste contra Rata Vagabunda', 'Luchaste contra Conejo Salvaje', 'Luchaste contra @TuSexiCosplayer', 'Luchaste contra Zombi Andante',
+    'Luchaste contra Lombriz Gigante', 'Luchaste contra Murciélago Sombrío', 'Luchaste contra Pájaro Agazapado', 'Luchaste contra Lobo Cazador', 'Luchaste contra Hormiga Guerrera'
+  ];
+
+  const enemigosIntermedios = [
+    'Luchaste contra Troll de Bosque', 'Luchaste contra Basilisco de Piedra', 'Luchaste contra Gigante de Hielo', 'Luchaste contra León del Desierto', 'Luchaste contra Gárgola Maldita',
+    'Luchaste contra Tigre de Montaña', 'Luchaste contra Dragón de Fuego', 'Luchaste contra Hombre Lobo', 'Luchaste contra Hada Oscura', 'Luchaste contra Minotauro'
+  ];
+
+  const enemigosDificiles = [
+    'Luchaste contra Demonio Destructor', 'Luchaste contra Dragón de Sombra', 'Luchaste contra Vampiro Eterno', 'Luchaste contra Golem de Lava', 'Luchaste contra Kobold Guerrero',
+    'Luchaste contra Fénix Ardiente', 'Luchaste contra Espíritu Ancestral', 'Luchaste contra Guerrero Maldito', 'Luchaste contra Dios Oscuro', 'Luchaste contra @Monolito00'
+  ];
+
+  const enemigosEpicos = [
+    'Luchaste contra @jotage87', 'Luchaste contra @karii_cba', 'Luchaste contra Dragón Celestial', 'Luchaste contra Troll Colosal',
+    'Leviatán Marítimo', 'Luchaste contra Serpiente de Hierro', 'Luchaste contra Tormenta Abismal', 'Luchaste contra Coloso Eterno', 'Luchaste contra Reina de las Sombras',
+    'Luchaste contra Rey de los Cielos'
+  ];
+
+  // Seleccionar el enemigo según la dificultad
+  let enemigo;
+  let recompensa;
+
+  switch (dificultad) {
+    case 100: // Misión fácil
+      enemigo = enemigosFaciles[Math.floor(Math.random() * enemigosFaciles.length)];
+      recompensa = 150; // Recompensa por misión fácil
+      break;
+    case 300: // Misión intermedia
+      enemigo = enemigosIntermedios[Math.floor(Math.random() * enemigosIntermedios.length)];
+      recompensa = 400; // Recompensa por misión intermedia
+      break;
+    case 500: // Misión difícil
+      enemigo = enemigosDificiles[Math.floor(Math.random() * enemigosDificiles.length)];
+      recompensa = 600; // Recompensa por misión difícil
+      break;
+    case 2000: // Misión épica
+      enemigo = enemigosEpicos[Math.floor(Math.random() * enemigosEpicos.length)];
+      recompensa = 4000; // Recompensa por misión épica
+      break;
+    default:
+      return { mensaje: 'Dificultad no válida.', recompensa: 0 };
+  }
+
+  // Crear mensaje de misión
+  let mensaje = `PELEASTE CONTRA ${enemigo}, GANASTE ${recompensa} monedas.`;
+
+  return { mensaje, recompensa };
+};
+
+// Ruta para realizar una misión
+app.get('/mision', (req, res) => {
+  const user = req.query.user;
+  const costo = parseInt(req.query.cost);
+
+  if (!user || !costo || !usersData[user]) {
+    return res.send('Usuario no encontrado o información inválida.');
+  }
+
+  if (usersData[user].monedas < costo) {
+    return res.send(`${user}, no tienes suficientes monedas para esta misión.`);
+  }
+
+  // Generar misión
+  const mision = generarMision(costo);
+  if (mision.recompensa > 0) {
+    usersData[user].monedas -= costo;
+    usersData[user].monedas += mision.recompensa;
+    saveUsers();
+    res.send(`${user}, ${mision.mensaje}`);
+  } else {
+    res.send('Misión no válida.');
+  }
+});
+
+// Inicializar los usuarios cuando el servidor se inicia
+loadUsers();
+
+// Servir la aplicación en el puerto 3000
+app.listen(port, () => {
+  console.log(`Servidor corriendo en http://localhost:${port}`);
 });
