@@ -27,8 +27,22 @@ app.get('/monedas', (req, res) => {
   if (usersData[user]) {
     res.send(`${user}, tienes ${usersData[user].monedas} monedas.`);
   } else {
-    res.send(`Usuario no encontrado. Usa !mision para comenzar.`);
+    res.send(`Usuario no encontrado. Usa !registrar para comenzar.`);
   }
+});
+
+// Ruta para registrar un nuevo usuario con 200 monedas
+app.get('/registrar', (req, res) => {
+  const user = req.query.user;
+
+  if (usersData[user]) {
+    return res.send(`${user}, ya estás registrado.`);
+  }
+
+  // Registrar al usuario con 200 monedas iniciales
+  usersData[user] = { monedas: 200, prestamo: 0 };
+  saveUsers();
+  res.send(`${user}, te has registrado exitosamente con 200 monedas.`);
 });
 
 // Ruta para solicitar un préstamo
@@ -43,7 +57,7 @@ app.get('/prestamo', (req, res) => {
   } else if (usersData[user]) {
     res.send(`${user}, no necesitas un préstamo. Tienes más de 100 monedas.`);
   } else {
-    res.send(`Usuario no encontrado. Usa !mision para comenzar.`);
+    res.send(`Usuario no encontrado. Usa !registrar para comenzar.`);
   }
 });
 
