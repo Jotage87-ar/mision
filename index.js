@@ -114,6 +114,17 @@ app.get('/prestamo', (req, res) => {
     saveUsers();
 });
 
+app.get('/monedas', (req, res) => {
+    const userName = req.query.user || 'Anónimo';
+    const user = users.find(u => u.name === userName);
+
+    if (!user) {
+        return res.send(`${userName}, no tienes un registro en el sistema.`);
+    }
+
+    res.send(`${userName}, tienes ${user.coins} monedas.`);
+});
+
 // Ruta por defecto para indicar uso correcto del comando
 app.get('/mision', (req, res) => {
     res.send("Por favor usa !mision seguido de 100, 300, 500 o 2000 para empezar una misión.");
