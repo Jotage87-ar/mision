@@ -38,7 +38,6 @@ const missionTiers = {
     ]},
 };
 
-// Ruta para ejecutar una misión
 app.get('/mision', (req, res) => {
     const userName = req.query.user || 'Anónimo';
     const missionCost = parseInt(req.query.cost, 10);
@@ -58,26 +57,21 @@ app.get('/mision', (req, res) => {
         users.push(user);
     }
 
-    // Verifica si el usuario tiene saldo suficiente o necesita un préstamo
+    // Verifica si el usuario tiene saldo suficiente para la misión
     if (user.coins < missionCost) {
-        const loanNeeded = missionCost - user.coins;
-        user.loan += loanNeeded;
-        user.coins = 0;
-        res.send(`No tienes suficientes monedas. Se te ha otorgado un préstamo de ${loanNeeded} monedas.`);
-    } else {
-        user.coins -= missionCost; // Deduce el costo de la misión
+        return res.send(`Monedas insuficientes. Usa el comando !monedas para ver cuántas tienes.`);
     }
+
+    user.coins -= missionCost; // Deduce el costo de la misión
 
     // Determina el resultado de la misión
     const randomOutcome = Math.random();
-    const enemy = mission.enemies[Math.floor(Math.random() * mission.enemies.length)];
-
     if (randomOutcome < mission.successRate) {
         user.coins += mission.reward;
-        res.send(`¡${userName}, completaste la misión contra "${enemy}" y ganaste ${mission.reward} monedas! Ahora tienes ${user.coins} monedas.`);
+        res.send(`¡${userName}, completaste la misión y ganaste ${mission.reward} monedas! Ahora tienes ${user.coins} monedas.`);
     } else {
-        user.coins -= mission.penalty;
-        res.send(`¡${userName}, fallaste la misión contra "${enemy}"! Perdiste ${mission.penalty} monedas. Ahora tienes ${user.coins} monedas.`);
+        user.coins += mission.penalty; // Solo pierde las monedas invertidas en la misión
+        res.send(`¡${userName}, fallaste la misión! Perdiste ${missionCost} monedas. Ahora tienes ${user.coins} monedas.`);
     }
 
     // Guardar usuarios y evitar duplicados
