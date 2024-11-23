@@ -38,40 +38,45 @@ const missionTiers = {
     ]},
 };
 
+// Ruta para ejecutar una misión
 app.get('/mision', (req, res) => {
     const userName = req.query.user || 'Anónimo';
     const missionCost = parseInt(req.query.cost, 10);
 
+    // Verificar si la misión es válida
     if (!missionTiers[missionCost]) {
         return res.send('Por favor selecciona un monto válido para la misión: 100, 300, 500 o 2000.');
     }
 
     const mission = missionTiers[missionCost];
 
-    // Busca al usuario
+    // Buscar al usuario
     let user = users.find((u) => u.name === userName);
 
-    // Si el usuario no existe, se crea con el saldo inicial
+    // Si el usuario no existe, se crea con saldo inicial
     if (!user) {
         user = { name: userName, coins: 200, loan: 0 };
         users.push(user);
     }
 
-    // Verifica si el usuario tiene saldo suficiente para la misión
+    // Verifica si el usuario tiene suficiente saldo
     if (user.coins < missionCost) {
         return res.send(`Monedas insuficientes. Usa el comando !monedas para ver cuántas tienes.`);
     }
 
     user.coins -= missionCost; // Deduce el costo de la misión
 
+    // Selecciona una misión aleatoria
+    const missionList = missionMissions[missionCost];
+    const selectedMission = missionList[Math.floor(Math.random() * missionList.length)];
+
     // Determina el resultado de la misión
     const randomOutcome = Math.random();
     if (randomOutcome < mission.successRate) {
         user.coins += mission.reward;
-        res.send(`¡${userName}, completaste la misión y ganaste ${mission.reward} monedas! Ahora tienes ${user.coins} monedas.`);
+        res.send(`¡${userName}, completaste la misión "${selectedMission}" y ganaste ${mission.reward} monedas! Ahora tienes ${user.coins} monedas.`);
     } else {
-        user.coins += mission.penalty; // Solo pierde las monedas invertidas en la misión
-        res.send(`¡${userName}, fallaste la misión! Perdiste ${missionCost} monedas. Ahora tienes ${user.coins} monedas.`);
+        res.send(`¡${userName}, fallaste la misión "${selectedMission}"! Perdiste ${missionCost} monedas. Ahora tienes ${user.coins} monedas.`);
     }
 
     // Guardar usuarios y evitar duplicados
