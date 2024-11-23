@@ -20,21 +20,21 @@ function saveUsers() {
 // Configuración de misiones
 const missionTiers = {
     100: { reward: 150, penalty: 100, successRate: 0.7, enemies: [
-        'Luchaste contra Hoja Inerte', 'Luchaste contra Rata Vagabunda', 'Luchaste contra Conejo Salvaje', 'Luchaste contra @TuSexiCosplayer', 'Luchaste contra Zombi Andante',
-        'Luchaste contra Lombriz Gigante', 'Luchaste contra Murciélago Sombrío', 'Luchaste contra Pájaro Agazapado', 'Luchaste contra Lobo Cazador', 'Luchaste contra Hormiga Guerrera'
+        'Hoja Inerte', 'Rata Vagabunda', 'Conejo Salvaje', '@TuSexiCosplayer', 'Zombi Andante',
+        'Lombriz Gigante', 'Murciélago Sombrío', 'Pájaro Agazapado', 'Lobo Cazador', 'Hormiga Guerrera'
     ]},
     300: { reward: 500, penalty: 300, successRate: 0.5, enemies: [
-        'Luchaste contra Troll de Bosque', 'Luchaste contra Basilisco de Piedra', 'Luchaste contra Gigante de Hielo', 'Luchaste contra León del Desierto', 'Luchaste contra Gárgola Maldita',
-        'Luchaste contra Tigre de Montaña', 'Luchaste contra Dragón de Fuego', 'Luchaste contra Hombre Lobo', 'Luchaste contra Hada Oscura', 'Luchaste contra Minotauro'
+        'Troll de Bosque', 'Basilisco de Piedra', 'Gigante de Hielo', 'León del Desierto', 'Gárgola Maldita',
+        'Tigre de Montaña', 'Dragón de Fuego', 'Hombre Lobo', '@laujx2', 'Minotauro'
     ]},
     500: { reward: 900, penalty: 500, successRate: 0.4, enemies: [
-        'Luchaste contra Demonio Destructor', 'Luchaste contra Dragón de Sombra', 'Luchaste contra Vampiro Eterno', 'Luchaste contra Golem de Lava', 'Luchaste contra Kobold Guerrero',
-        'Luchaste contra Fénix Ardiente', 'Luchaste contra Espíritu Ancestral', 'Luchaste contra Guerrero Maldito', 'Luchaste contra Dios Oscuro', 'Luchaste contra @Monolito00'
+        'Demonio Destructor', 'Dragón de Sombra', 'Vampiro Eterno', 'Golem de Lava', 'Kobold Guerrero',
+        'Fénix Ardiente', 'Espíritu Ancestral', 'Guerrero Maldito', 'Dios Oscuro', '@Monolito00'
     ]},
     2000: { reward: 4000, penalty: 2000, successRate: 0.25, enemies: [
-        'Luchaste contra @jotage87', 'Luchaste contra @karii_cba', 'Luchaste contra Dragón Celestial', 'Luchaste contra Troll Colosal',
-        'Leviatán Marítimo', 'Luchaste contra Serpiente de Hierro', 'Luchaste contra Tormenta Abismal', 'Luchaste contra Coloso Eterno', 'Luchaste contra Reina de las Sombras',
-        'Luchaste contra Rey de los Cielos'
+        '@jotage87', '@karii_cba', 'Dragón Celestial', 'Troll Colosal',
+        'Leviatán Marítimo', 'Serpiente de Hierro', 'La hermana de alguien', 'Coloso Eterno', 'Reina de las Sombras',
+        'Rey de los Cielos'
     ]},
 };
 
